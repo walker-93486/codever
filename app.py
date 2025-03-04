@@ -53,8 +53,8 @@ def index():
                     "message": f"Server error: {str(e)}"
                 }), 500
 
-    logger.info("Rendering index.html")
-    return render_template("index.html")
+    logger.info("Rendering index_with_emoji.html")
+    return render_template("index_with_emoji.html")
 
 def send_message_to_telegram(message):
     """ارسال مستقیم پیام به ربات تلگرام و برگردوندن پاسخ"""
